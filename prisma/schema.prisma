@@ -10,3 +10,88 @@ datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id        String      @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relações
+  favorites Favorite[]
+  cart      Cart?
+  orders    Order[]
+}
+
+model Product {
+  id            String      @id @default(uuid())
+  title         String
+  description   String?
+  price         Float    // Preço atual de venda
+  originalPrice Float?   // Preço original, se houver desconto
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  favoritedBy Favorite[]
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+}
+
+model Favorite { //Tabela pivô para produtos e usuários
+  id        String      @id @default(uuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId]) // Garante que um usuário só pode favoritar um produto uma vez
+}
+
+model Cart {
+  id        String      @id @default(uuid())
+  userId    String      @unique // Um usuário tem um carrinho
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+}
+
+model CartItem {
+  id        String    @id @default(uuid())
+  cartId    String
+  productId String
+  quantity  Int    @default(1)
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId]) // Garante que um produto apareça apenas uma vez por carrinho, controlado pela quantidade
+}
+
+model Order {
+  id          String       @id @default(uuid())
+  userId      String
+  totalAmount Float 
+  status      String    @default("PENDING") // Ex: PENDING, PROCESSING, SHIPPED, DELIVERED, CANCELED
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id])
+  items OrderItem[]
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  priceAtPurchase Float // Preço do produto no momento da compra (importante para histórico)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id]) // Mantém o histórico do produto mesmo que ele seja deletado da loja.
+}
