@@ -34,7 +34,6 @@ export class UserService {
           throw new ConflictException(`O email '${email}' já está cadastrado.`);
         }
       }
-      // Logar o erro no servidor
       console.error(`Error creating user with email ${email} in database:`, error);
       throw new InternalServerErrorException(
         'Não foi possível criar o usuário devido a um erro interno. Por favor, tente novamente.',

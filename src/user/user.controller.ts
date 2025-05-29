@@ -14,8 +14,9 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserEntity } from './entities/user.entity';
-import { ApiBody, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('User')
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
@@ -29,6 +30,7 @@ export class UserController {
   }
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: HttpStatus.OK })
   async findAll(): Promise<UserEntity[]> {
     const users: UserEntity[] = await this.userService.findAll();
@@ -36,6 +38,7 @@ export class UserController {
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: HttpStatus.OK })
   async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<UserEntity> {
     const user: UserEntity = await this.userService.findOne(id);
@@ -43,6 +46,7 @@ export class UserController {
   }
 
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: HttpStatus.OK })
   async update(
@@ -54,6 +58,7 @@ export class UserController {
   }
 
   @Delete(':id')
+  @HttpCode(HttpStatus.OK)
   @HttpCode(HttpStatus.NO_CONTENT)
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     await this.userService.remove(id);

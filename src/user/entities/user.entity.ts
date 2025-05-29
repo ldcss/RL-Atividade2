@@ -39,7 +39,7 @@ export class UserEntity {
   @IsDate()
   updatedAt: Date;
 
-  @Exclude() // Garante que a senha nunca seja incluída na resposta JSON
+  @Exclude()
   @IsString()
   password?: string;
 }
