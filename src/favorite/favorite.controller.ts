@@ -1,4 +1,3 @@
-// src/favorite/favorite.controller.ts
 import {
   Controller,
   Get,
@@ -8,16 +7,25 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
-  Query, // Importar Query para o DELETE
   ParseUUIDPipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { Favorite } from '@prisma/client';
+import { AuthGuard } from '@nestjs/passport';
+
+interface AuthenticatedUserPayload {
+  id: string;
+  email: string;
+}
 
 @ApiTags('Favorite')
 @Controller('favorite')
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('access-token')
 export class FavoriteController {
   constructor(private readonly favoriteService: FavoriteService) {}
 
@@ -27,18 +35,25 @@ export class FavoriteController {
   @ApiResponse({
     status: HttpStatus.CREATED,
   })
-  async create(@Body() createFavoriteDto: CreateFavoriteDto): Promise<Favorite> {
-    const favorite = await this.favoriteService.create(createFavoriteDto);
+  async create(
+    @Body() createFavoriteDto: CreateFavoriteDto,
+    @Req() req: Request & { user: AuthenticatedUserPayload },
+  ): Promise<Favorite> {
+    const userId = req.user.id;
+    const favorite = await this.favoriteService.create(userId, createFavoriteDto.productId);
     return favorite;
   }
 
-  @Get('user/:userId')
+  @Get()
   @ApiParam({ name: 'userId', description: 'ID do Usuário (UUID)', type: String })
   @ApiResponse({
     status: HttpStatus.OK,
   })
   @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Usuário não encontrado.' })
-  async findAllByUser(@Param('userId', ParseUUIDPipe) userId: string): Promise<Favorite[]> {
+  async findAllByUser(
+    @Req() req: Request & { user: AuthenticatedUserPayload },
+  ): Promise<Favorite[]> {
+    const userId = req.user.id;
     const favorites = await this.favoriteService.findAllByUserId(userId);
     return favorites;
   }
@@ -55,27 +70,22 @@ export class FavoriteController {
   async findOneFavoriteRecord(
     @Param('favoriteId', ParseUUIDPipe) favoriteId: string,
   ): Promise<Favorite> {
-    const favorite = await this.favoriteService.findOneByFavoriteId(favoriteId); // Use o novo método do service
+    const favorite = await this.favoriteService.findOneByFavoriteId(favoriteId);
     return favorite;
   }
 
-  @Delete() // Rota DELETE para /favorites?userId=...&productId=...
+  @Delete(':productId')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiQuery({
-    name: 'userId',
-    required: true,
-    description: 'ID do usuário (UUID) do qual remover o favorito.',
-  })
-  @ApiQuery({
+  @ApiParam({
     name: 'productId',
-    required: true,
     description: 'ID do produto (UUID) a ser removido dos favoritos.',
   })
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   async remove(
-    @Query('userId', ParseUUIDPipe) userId: string,
-    @Query('productId', ParseUUIDPipe) productId: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
+    @Req() req: Request & { user: AuthenticatedUserPayload },
   ): Promise<void> {
+    const userId = req.user.id;
     await this.favoriteService.removeByUserAndProduct(userId, productId);
   }
 }

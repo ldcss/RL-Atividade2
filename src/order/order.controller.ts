@@ -9,15 +9,26 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { OrderWithDetails } from './types/order-with-details'; // Importe seu tipo
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
+import { OrderWithDetails } from './types/order-with-details';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiParam,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Orders')
 @Controller('orders')
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('access-token')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 

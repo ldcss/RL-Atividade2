@@ -5,7 +5,6 @@ import {
   ConflictException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { Favorite } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import { PrismaService } from 'prisma/prisma.service';
@@ -14,9 +13,7 @@ import { PrismaService } from 'prisma/prisma.service';
 export class FavoriteService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createFavoriteDto: CreateFavoriteDto): Promise<Favorite> {
-    const { userId, productId } = createFavoriteDto;
-
+  async create(userId: string, productId: string): Promise<Favorite> {
     const userExists = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!userExists) {
       throw new NotFoundException(`Usuário com ID '${userId}' não encontrado.`);

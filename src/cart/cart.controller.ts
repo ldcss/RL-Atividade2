@@ -10,14 +10,18 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
 import { ManageCartItemDto } from './dto/manage-cart-item.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiParam, ApiBody, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { CartWithDetails } from './dto/cart-with-details.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Cart')
 @Controller('cart')
+@UseGuards(AuthGuard('jwt'))
+@ApiBearerAuth('access-token')
 export class CartController {
   constructor(private readonly cartService: CartService) {}
 
