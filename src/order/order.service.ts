@@ -11,7 +11,7 @@ import { ProductService } from '../product/product.service';
 import { CartService } from '../cart/cart.service'; // Para limpar o carrinho
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { Order, OrderItem, Prisma } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from 'prisma/prisma.service';
 import { OrderWithDetails } from './types/order-with-details';
 import { OrderStatus } from './types/order-status';
@@ -32,10 +32,10 @@ export class OrderService {
       throw new BadRequestException('O pedido deve conter pelo menos um item.');
     }
 
-    // 1. Validação do usuário (fora da transação principal)
-    await this.userService.findOne(userId); // Lança NotFoundException se não existir
+    //procura usuario
+    await this.userService.findOne(userId);
 
-    // 2. Validar produtos, coletar preços e preparar dados dos itens (fora da transação principal)
+    // valida, procura e calcula o total dos produtos
     let calculatedTotalAmount = 0;
     const orderItemsToCreateInput: Prisma.OrderItemCreateManyInput[] = [];
 
@@ -52,11 +52,11 @@ export class OrderService {
         productId: itemDto.productId,
         quantity: itemDto.quantity,
         priceAtPurchase,
-        orderId: '', // Será preenchido após a criação do pedido
+        orderId: '', // é preenchido após a criação do pedido
       });
     }
 
-    // 3. Criar Order e OrderItems dentro da transação
+    // cria a comp
     const createdOrderWithItems = await this.prisma.$transaction(async tx => {
       // Cria o registro Order
       const order = await tx.order.create({

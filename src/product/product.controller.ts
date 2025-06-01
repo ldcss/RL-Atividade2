@@ -9,12 +9,14 @@ import {
   HttpStatus,
   HttpCode,
   ParseUUIDPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiTags, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { Product } from './entities/product.entity';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('Product')
 @Controller('product')
@@ -22,6 +24,8 @@ export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
   @Post()
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.CREATED)
   @ApiBody({ type: CreateProductDto })
   async create(@Body() createProductDto: CreateProductDto): Promise<Product> {
@@ -45,6 +49,8 @@ export class ProductController {
   }
 
   @Patch(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.OK)
   @ApiBody({ type: UpdateProductDto })
   @ApiResponse({
@@ -59,6 +65,8 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard('jwt'))
+  @ApiBearerAuth('access-token')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiResponse({ status: HttpStatus.NO_CONTENT })
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {

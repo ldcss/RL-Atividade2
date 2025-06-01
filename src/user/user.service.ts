@@ -10,19 +10,44 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'prisma/prisma.service';
 import { Prisma, User } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class UserService {
-  constructor(private prisma: PrismaService) {}
+  private readonly saltRounds: number;
+
+  constructor(
+    private prisma: PrismaService,
+    private configService: ConfigService,
+  ) {
+    const saltFromEnv = parseInt(this.configService.get<string>('SALT_ROUNDS', '10'), 10);
+    this.saltRounds = isNaN(saltFromEnv) ? 10 : saltFromEnv;
+
+    if (isNaN(saltFromEnv)) {
+      console.warn(
+        `SALT_ROUNDS não é um número válido no .env ou não foi definido. Usando valor padrão: 10.`,
+      );
+    }
+  }
   async create(createUserDto: CreateUserDto): Promise<User> {
     const { email, password, name } = createUserDto;
+
+    let hashedPassword: string;
+    try {
+      // Use this.saltRounds aqui
+      hashedPassword = await bcrypt.hash(password, this.saltRounds);
+    } catch (error) {
+      console.error(`Error hashing password for email ${email}:`, error);
+      throw new InternalServerErrorException('Erro ao processar a senha.');
+    }
 
     try {
       // Criação do Usuário no banco de dados
       const newUser = await this.prisma.user.create({
         data: {
           email,
-          password: password,
+          password: hashedPassword,
           name,
         },
       });
@@ -38,6 +63,18 @@ export class UserService {
       throw new InternalServerErrorException(
         'Não foi possível criar o usuário devido a um erro interno. Por favor, tente novamente.',
       );
+    }
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+      return user; // retorna o usuário ou null se não encontrado
+    } catch (error) {
+      console.error(`Error fetching user by email ${email}:`, error);
+      throw new InternalServerErrorException('Erro ao buscar usuário por email.');
     }
   }
 
@@ -69,6 +106,8 @@ export class UserService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    await this.findOne(id);
+
     const dataForPrismaUpdate: Prisma.UserUpdateInput = {};
 
     if (updateUserDto.email) {
@@ -79,9 +118,16 @@ export class UserService {
     }
     if (updateUserDto.password) {
       if (updateUserDto.password.trim() === '') {
-        throw new BadRequestException('A nova senha não pode ser uma string vazia.');
-      } else {
-        dataForPrismaUpdate.password = updateUserDto.password;
+        throw new BadRequestException('A nova senha não pode ser uma string vazia se fornecida.');
+      }
+      if (updateUserDto.password.length < 8) {
+        throw new BadRequestException('A nova senha deve ter pelo menos 8 caracteres.');
+      }
+      try {
+        dataForPrismaUpdate.password = await bcrypt.hash(updateUserDto.password, this.saltRounds);
+      } catch (error) {
+        console.error(`Error hashing password for user ID ${id}:`, error);
+        throw new InternalServerErrorException('Erro ao processar a atualização da senha.');
       }
     }
 
@@ -111,7 +157,7 @@ export class UserService {
   }
 
   async remove(id: string): Promise<User> {
-    await this.findOne(id); // Reutiliza a lógica que lança NotFoundException
+    await this.findOne(id);
 
     try {
       return await this.prisma.user.delete({

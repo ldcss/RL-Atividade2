@@ -11,6 +11,17 @@ async function bootstrap() {
     .setDescription('Documentação da API do sistema de compras online')
     .setVersion('1.0')
     .addTag('user', 'Operações relacionadas a usuários')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'JWT',
+        description: 'Insira o token JWT',
+        in: 'header',
+      },
+      'access-token',
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
