@@ -16,11 +16,7 @@ import { CreateFavoriteDto } from './dto/create-favorite.dto';
 import { ApiTags, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
 import { Favorite } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
-
-interface AuthenticatedUserPayload {
-  id: string;
-  email: string;
-}
+import { AuthenticatedUserPayload } from 'src/auth/type/authenticated-user.payload';
 
 @ApiTags('Favorite')
 @Controller('favorite')
