@@ -2,6 +2,7 @@ import { PrismaClient, Prisma } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as dotenv from 'dotenv';
 import { OrderStatus } from '../src/order/types/order-status';
+import { UserRole } from '../src/user/type/UserRole';
 
 // Carregue as variáveis de ambiente do arquivo .env
 dotenv.config();
@@ -19,43 +20,78 @@ if (isNaN(SALT_ROUNDS) || (SALT_ROUNDS === 10 && process.env.SALT_ROUNDS !== '10
 async function main() {
   console.log(`Start seeding with SALT_ROUNDS: ${SALT_ROUNDS} ...`);
 
-  // criar usuários
+  // --- Criar Usuários com Roles ---
   const hashedPasswordUser1 = await bcrypt.hash('password123', SALT_ROUNDS);
   const user1 = await prisma.user.upsert({
     where: { email: 'alice@example.com' },
-    update: { password: hashedPasswordUser1, name: 'Alice Wonderland' },
+    update: {
+      name: 'Alice Wonderland',
+      password: hashedPasswordUser1,
+      role: UserRole.CUSTOMER,
+    },
     create: {
       email: 'alice@example.com',
       name: 'Alice Wonderland',
       password: hashedPasswordUser1,
+      role: UserRole.CUSTOMER,
     },
   });
 
   const hashedPasswordUser2 = await bcrypt.hash('password456', SALT_ROUNDS);
   const user2 = await prisma.user.upsert({
     where: { email: 'bob@example.com' },
-    update: { password: hashedPasswordUser2, name: 'Bob The Builder' },
+    update: {
+      name: 'Bob The Builder',
+      password: hashedPasswordUser2,
+      role: UserRole.CUSTOMER,
+    },
     create: {
       email: 'bob@example.com',
       name: 'Bob The Builder',
       password: hashedPasswordUser2,
+      role: UserRole.CUSTOMER,
     },
   });
 
   const hashedPasswordUser3 = await bcrypt.hash('password789', SALT_ROUNDS);
   const user3 = await prisma.user.upsert({
     where: { email: 'charlie@example.com' },
-    update: { password: hashedPasswordUser3, name: 'Charlie Brown' },
+    update: {
+      name: 'Charlie Brown',
+      password: hashedPasswordUser3,
+      role: UserRole.CUSTOMER,
+    },
     create: {
       email: 'charlie@example.com',
       name: 'Charlie Brown',
       password: hashedPasswordUser3,
+      role: UserRole.CUSTOMER,
     },
   });
-  console.log(`Created/Updated users: ${user1.name}, ${user2.name}, ${user3.name}`);
 
-  await prisma.product.deleteMany({}); // limpa produtos para evitar conflito de título se não for único
+  // Criando um usuário Administrador
+  const hashedPasswordAdmin = await bcrypt.hash('adminPass123!', SALT_ROUNDS);
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@example.com' },
+    update: {
+      name: 'Administrador do Sistema',
+      password: hashedPasswordAdmin,
+      role: UserRole.ADMIN,
+    },
+    create: {
+      email: 'admin@example.com',
+      name: 'Administrador do Sistema',
+      password: hashedPasswordAdmin,
+      role: UserRole.ADMIN,
+    },
+  });
 
+  console.log(
+    `Created/Updated users: ${user1.name} (CUSTOMER), ${user2.name} (CUSTOMER), ${user3.name} (CUSTOMER), ${adminUser.name} (ADMIN)`,
+  );
+
+  // --- Limpeza e Criação de Produtos  ---
+  await prisma.product.deleteMany({});
   const product1 = await prisma.product.create({
     data: {
       title: 'Laptop Pro X',
@@ -65,7 +101,6 @@ async function main() {
       category: 'Eletrônicos',
     },
   });
-
   const product2 = await prisma.product.create({
     data: {
       title: 'Cafeteira MasterBrew',
@@ -74,7 +109,6 @@ async function main() {
       category: 'Casa e Cozinha',
     },
   });
-
   const product3 = await prisma.product.create({
     data: {
       title: 'Livro: A Arte da Guerra',
@@ -84,7 +118,6 @@ async function main() {
       category: 'Livros',
     },
   });
-
   const product4 = await prisma.product.create({
     data: {
       title: 'Fone de Ouvido Bluetooth WaveSound',
@@ -97,14 +130,14 @@ async function main() {
     `Created products: ${product1.title}, ${product2.title}, ${product3.title}, ${product4.title}`,
   );
 
-  // limpa favoritos existentes
+  // --- Limpeza e Criação de Favoritos  ---
   await prisma.favorite.deleteMany({});
-
   const favoritesToCreate = [
     { userId: user1.id, productId: product1.id },
     { userId: user1.id, productId: product3.id },
     { userId: user2.id, productId: product2.id },
     { userId: user3.id, productId: product4.id },
+    { userId: adminUser.id, productId: product1.id },
   ];
   for (const favData of favoritesToCreate) {
     try {
@@ -121,7 +154,7 @@ async function main() {
   }
   console.log(`Created favorites.`);
 
-  // limpar carrinhos e itens de carrinho existentes
+  // --- Limpeza e Criação de Carrinhos e Itens ---
   await prisma.cartItem.deleteMany({});
   await prisma.cart.deleteMany({});
 
@@ -140,11 +173,11 @@ async function main() {
   });
   console.log(`Created cart with items for ${user3.name}.`);
 
-  // limpar pedidos e itens de pedido existentes
+  // --- Limpeza e Criação de Pedidos e Itens ---
   await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
 
-  // pedido 1: Bob
+  // Pedido 1: Bob (PENDING)
   const orderBobPending = await prisma.order.create({
     data: {
       userId: user2.id,
@@ -162,20 +195,18 @@ async function main() {
   });
   console.log(`Created PENDING order for ${user2.name} with total ${orderBobPending.totalAmount}.`);
 
-  // pedido 2: Alice
+  // Pedido 2: Alice compra e recebe o Laptop
   const orderAliceDelivered = await prisma.order.create({
     data: {
       userId: user1.id,
       status: OrderStatus.DELIVERED,
       totalAmount: product1.price * 1,
-      items: {
-        create: [{ productId: product1.id, quantity: 1, priceAtPurchase: product1.price }],
-      },
+      items: { create: [{ productId: product1.id, quantity: 1, priceAtPurchase: product1.price }] },
     },
   });
   console.log(`Created DELIVERED order for ${user1.name} (Laptop).`);
 
-  // Pedido 3: Charlie
+  // Pedido 3: Charlie compra e recebe a Cafeteira e o Livro
   const orderCharlieDelivered = await prisma.order.create({
     data: {
       userId: user3.id,
@@ -193,10 +224,20 @@ async function main() {
   });
   console.log(`Created DELIVERED order for ${user3.name} (Cafeteira, Livro).`);
 
-  // limpa avaliações existentes
+  // Pedido 4: Admin compra e recebe o Fone
+  const orderAdminDelivered = await prisma.order.create({
+    data: {
+      userId: adminUser.id,
+      status: OrderStatus.DELIVERED,
+      totalAmount: product4.price * 1,
+      items: { create: [{ productId: product4.id, quantity: 1, priceAtPurchase: product4.price }] },
+    },
+  });
+  console.log(`Created DELIVERED order for ${adminUser.name} (Fone).`);
+
+  // --- Limpeza e Criação de Avaliações ---
   await prisma.review.deleteMany({});
 
-  // alice avalia o Laptop que foi entregue
   await prisma.review.upsert({
     where: { userId_productId: { userId: user1.id, productId: product1.id } },
     update: { rating: 5, comment: 'Adorei o laptop, super rápido! (atualizado)' },
@@ -209,34 +250,31 @@ async function main() {
   });
   console.log(`${user1.name} reviewed ${product1.title}.`);
 
-  // charlie avalia a Cafeteira que foi entregue
   await prisma.review.upsert({
     where: { userId_productId: { userId: user3.id, productId: product2.id } },
-    update: {
-      rating: 4,
-      comment: 'Faz um bom café, mas poderia ser mais silenciosa. (atualizado)',
-    },
-    create: {
-      userId: user3.id,
-      productId: product2.id,
-      rating: 4,
-      comment: 'Faz um bom café, mas poderia ser mais silenciosa.',
-    },
+    update: { rating: 4, comment: 'Faz um bom café. (atualizado)' },
+    create: { userId: user3.id, productId: product2.id, rating: 4, comment: 'Faz um bom café.' },
   });
   console.log(`${user3.name} reviewed ${product2.title}.`);
 
-  // charlie também avalia o Livro que foi entregue
   await prisma.review.upsert({
     where: { userId_productId: { userId: user3.id, productId: product3.id } },
     update: { rating: 5, comment: 'Leitura essencial! (atualizado)' },
-    create: {
-      userId: user3.id,
-      productId: product3.id,
-      rating: 5,
-      comment: 'Leitura essencial!',
-    },
+    create: { userId: user3.id, productId: product3.id, rating: 5, comment: 'Leitura essencial!' },
   });
   console.log(`${user3.name} reviewed ${product3.title}.`);
+
+  await prisma.review.upsert({
+    where: { userId_productId: { userId: adminUser.id, productId: product4.id } },
+    update: { rating: 5, comment: 'Qualidade de som incrível! (atualizado)' },
+    create: {
+      userId: adminUser.id,
+      productId: product4.id,
+      rating: 5,
+      comment: 'Qualidade de som incrível!',
+    },
+  });
+  console.log(`${adminUser.name} reviewed ${product4.title}.`);
 
   console.log(`Seeding finished.`);
 }

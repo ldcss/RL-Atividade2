@@ -16,6 +16,7 @@ model User {
   email     String   @unique
   name      String?
   password  String
+  role     String @default("CUSTOMER")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -23,7 +24,7 @@ model User {
   favorites Favorite[]
   cart      Cart?
   orders    Order[]
-  reviews Review[]
+  reviews   Review[]
 }
 
 model Product {
