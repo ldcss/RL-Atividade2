@@ -41,6 +41,7 @@ export class AuthController {
     status: HttpStatus.OK,
     description: 'Login bem-sucedido, retorna token de acesso.',
   })
+  @ApiOperation({ summary: 'Loga o usuário' })
   @ApiBody({ type: Login })
   @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Credenciais inválidas.' })
   async login(@Req() req: Request & { user: Omit<User, 'password'> }) {
