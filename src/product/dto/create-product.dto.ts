@@ -24,6 +24,16 @@ export class CreateProductDto {
   description?: string;
 
   @ApiProperty({
+    description: 'Categoria do produto.',
+    example: 'Smartphones',
+    required: true,
+    type: String,
+  })
+  @IsNotEmpty({ message: 'A categoria não pode ser vazia.' })
+  @IsString({ message: 'A descrição deve ser uma string.' })
+  category: string;
+
+  @ApiProperty({
     description: 'Preço atual de venda do produto.',
     example: 499.99,
     type: Number,

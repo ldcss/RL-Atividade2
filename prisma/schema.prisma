@@ -31,6 +31,7 @@ model Product {
   description   String?
   price         Float    // Preço atual de venda
   originalPrice Float?   // Preço original, se houver desconto
+  category      String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 

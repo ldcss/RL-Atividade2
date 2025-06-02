@@ -16,7 +16,7 @@ export class ProductService {
   constructor(private prisma: PrismaService) {}
 
   async create(createProductDto: CreateProductDto): Promise<Product> {
-    const { title, description, price, originalPrice } = createProductDto;
+    const { title, description, price, originalPrice, category } = createProductDto;
 
     // Validação de Regra de Negócio: originalPrice >= price
     if (originalPrice !== undefined && originalPrice !== null && price > originalPrice) {
@@ -30,6 +30,7 @@ export class ProductService {
           description,
           price,
           originalPrice,
+          category,
         },
       });
       return newProduct;
@@ -88,6 +89,15 @@ export class ProductService {
         throw new BadRequestException('O preço original não pode ser negativo.');
       }
       dataForPrismaUpdate.originalPrice = updateProductDto.originalPrice;
+    }
+    if (updateProductDto.category !== undefined) {
+      if (
+        typeof updateProductDto.category !== 'string' ||
+        updateProductDto.category.trim() === ''
+      ) {
+        throw new BadRequestException('A categoria, se fornecida, não pode ser uma string vazia.');
+      }
+      dataForPrismaUpdate.category = updateProductDto.category;
     }
 
     // Validação de Regra de Negócio: originalPrice >= price, considerando os valores atuais ou atualizados
