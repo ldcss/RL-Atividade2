@@ -35,7 +35,6 @@ export class UserService {
 
     let hashedPassword: string;
     try {
-      // Use this.saltRounds aqui
       hashedPassword = await bcrypt.hash(password, this.saltRounds);
     } catch (error) {
       console.error(`Error hashing password for email ${email}:`, error);
@@ -43,7 +42,7 @@ export class UserService {
     }
 
     try {
-      // Criação do Usuário no banco de dados
+      // criação do Usuário no banco de dados
       const newUser = await this.prisma.user.create({
         data: {
           email,
@@ -129,6 +128,10 @@ export class UserService {
         console.error(`Error hashing password for user ID ${id}:`, error);
         throw new InternalServerErrorException('Erro ao processar a atualização da senha.');
       }
+    }
+
+    if (updateUserDto.role !== undefined) {
+      dataForPrismaUpdate.role = updateUserDto.role;
     }
 
     if (Object.keys(dataForPrismaUpdate).length === 0) {
