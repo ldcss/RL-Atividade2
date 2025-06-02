@@ -13,7 +13,7 @@ import { UserService } from '../user/user.service';
 import { ProductService } from '../product/product.service';
 import { OrderStatus } from '../order/types/order-status';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class ReviewService {

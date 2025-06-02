@@ -12,7 +12,7 @@ import { CartService } from '../cart/cart.service'; // Para limpar o carrinho
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { OrderWithDetails } from './types/order-with-details';
 import { OrderStatus } from './types/order-status';
 
