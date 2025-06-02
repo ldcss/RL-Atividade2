@@ -13,13 +13,20 @@ import {
 } from '@nestjs/common';
 import { FavoriteService } from './favorite.service';
 import { CreateFavoriteDto } from './dto/create-favorite.dto';
-import { ApiTags, ApiResponse, ApiBody, ApiParam, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiResponse,
+  ApiBody,
+  ApiParam,
+  ApiBearerAuth,
+  ApiOperation,
+} from '@nestjs/swagger';
 import { Favorite } from '@prisma/client';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedUserPayload } from 'src/auth/type/authenticated-user.payload';
 
-@ApiTags('Favorite')
-@Controller('favorite')
+ApiTags('Favorites');
+@Controller('favorites')
 @UseGuards(AuthGuard('jwt'))
 @ApiBearerAuth('access-token')
 export class FavoriteController {
@@ -27,10 +34,24 @@ export class FavoriteController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @ApiBody({ type: CreateFavoriteDto })
+  @ApiOperation({ summary: 'Adicionar um produto aos favoritos do usuário logado' })
+  @ApiBody({ type: CreateFavoriteDto, description: 'ID do produto a ser favoritado.' })
   @ApiResponse({
     status: HttpStatus.CREATED,
   })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Dados inválidos (ex: ID do produto mal formatado).',
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Produto não encontrado ou usuário (do token) não encontrado.',
+  })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Este produto já foi favoritado por este usuário.',
+  })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Não autorizado.' })
   async create(
     @Body() createFavoriteDto: CreateFavoriteDto,
     @Req() req: Request & { user: AuthenticatedUserPayload },
@@ -41,11 +62,13 @@ export class FavoriteController {
   }
 
   @Get()
-  @ApiParam({ name: 'userId', description: 'ID do Usuário (UUID)', type: String })
+  @ApiOperation({ summary: 'Listar todos os favoritos do usuário logado' })
   @ApiResponse({
     status: HttpStatus.OK,
+    description: 'Lista de favoritos do usuário recuperada com sucesso.',
   })
-  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Usuário não encontrado.' })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Não autorizado.' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Usuário (do token) não encontrado.' })
   async findAllByUser(
     @Req() req: Request & { user: AuthenticatedUserPayload },
   ): Promise<Favorite[]> {
@@ -55,14 +78,27 @@ export class FavoriteController {
   }
 
   @Get(':favoriteId')
-  @ApiParam({ name: 'favoriteId', description: 'ID do registro de Favorito (UUID)', type: String })
+  @ApiOperation({
+    summary: 'Buscar um registro de favorito específico pelo seu ID',
+    description:
+      'Retorna um registro de favorito específico. Nota: Atualmente não verifica se o favorito pertence ao usuário logado.',
+  })
+  @ApiParam({
+    name: 'favoriteId',
+    description: 'ID do registro de Favorito (UUID)',
+    type: String,
+    format: 'uuid',
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
+    description: 'Registro de favorito encontrado.',
   })
   @ApiResponse({
     status: HttpStatus.NOT_FOUND,
-    description: 'Registro de favorito não encontrado.',
+    description: 'Registro de favorito com o ID fornecido não encontrado.',
   })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Não autorizado.' })
   async findOneFavoriteRecord(
     @Param('favoriteId', ParseUUIDPipe) favoriteId: string,
   ): Promise<Favorite> {
@@ -72,11 +108,20 @@ export class FavoriteController {
 
   @Delete(':productId')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({ summary: 'Remover um produto dos favoritos do usuário logado' })
   @ApiParam({
     name: 'productId',
     description: 'ID do produto (UUID) a ser removido dos favoritos.',
+    type: String,
+    format: 'uuid',
+    example: 'c1d2e3f4-a5b6-7890-1234-567890abcdef',
   })
-  @ApiResponse({ status: HttpStatus.NO_CONTENT })
+  @ApiResponse({ status: HttpStatus.NO_CONTENT, description: 'Favorito removido com sucesso.' })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Favorito não encontrado para este produto e usuário.',
+  })
+  @ApiResponse({ status: HttpStatus.UNAUTHORIZED, description: 'Não autorizado.' })
   async remove(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Req() req: Request & { user: AuthenticatedUserPayload },
