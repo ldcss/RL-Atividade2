@@ -28,7 +28,7 @@ Api de e-commerce criado para a segunda atividade do RocketLab.
 
 Crie um arquivo .env de acordo com o .env.example fornecido
 
-3. **Gere e popule oo banco de dados:**
+3. **Gere e popule o banco de dados:**
 
 ```bash
    pnpm run create:db
@@ -58,12 +58,12 @@ A estrutura do projeto segue as convenções do NestJS, promovendo modularidade 
   |- seed.ts        # (Opcional) Script para popular o banco com dados iniciais
 /src
   |- /auth          # Módulo de autenticação (login, registro, gerenciamento de token)
-  |- /users         # Módulo para gerenciamento de usuários
-  |- /products      # Módulo para gerenciamento de produtos
-  |- /carts         # Módulo para gerenciamento de carrinhos de compra
-  |- /orders        # Módulo para gerenciamento de pedidos
-  |- /favorites     # Módulo para gerenciamento de produtos favoritos
-  |- /reviews       # Módulo para gerenciamento de avaliações de produtos
+  |- /user         # Módulo para gerenciamento de usuários
+  |- /product      # Módulo para gerenciamento de produtos
+  |- /cart         # Módulo para gerenciamento de carrinhos de compra
+  |- /order        # Módulo para gerenciamento de pedidos
+  |- /favorite     # Módulo para gerenciamento de produtos favoritos
+  |- /review       # Módulo para gerenciamento de avaliações de produtos
   |- app.module.ts  # Módulo raiz da aplicação
   |- main.ts        # Arquivo de entrada da aplicação
 .env                # Arquivo para variáveis de ambiente (DATABASE_URL, JWT_SECRET, etc.)
@@ -82,7 +82,7 @@ A API oferece as seguintes funcionalidaddes principais:
 - Cadastro de novos usuários.
 - Login de usuários com email e senha.
 - Gerenciamento de perfil do usuário (visualização, atualização).
-- Definição de papéis de usuário (ex: `CUSTOMER`, `ADMIN` - necessita implementação da lógica de autorização).
+- Definição de papéis de usuário (ex: `CUSTOMER`, `ADMIN`).
 
 ### Produtos
 - Criação, listagem, visualização, atualização e remoção de produtos (CRUD - para administradores).
