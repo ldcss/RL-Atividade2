@@ -1,99 +1,181 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# RocketShop
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Api de e-commerce criado para a segunda atividade do RocketLab.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Como rodar o projeto
 
-## Description
+### Pré-requisitos
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- [Node.js](https://nodejs.org/) (recomendado v18 ou superior)
+- [pnpm](https://pnpm.io/) (gerenciador de pacotes)
 
-## Project setup
+### Instalação
 
-```bash
-$ pnpm install
-```
+1. **Clone o repositório:**
 
-## Compile and run the project
+   ```bash
+   git clone https://github.com/ldcss/RL-Atividade2.git
+   cd RL-Atividade2
+   ```
+
+2. **Instale as dependências:**
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Configure o .env**
+
+Crie um arquivo .env de acordo com o .env.example fornecido
+
+3. **Gere e popule oo banco de dados:**
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+   pnpm run create:db
 ```
 
-## Run tests
+4. **Inicie o servidor de desenvolvimento:**
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+   pnpm run start:dev
 ```
 
-## Deployment
+5. **Acesse a [Documentação do Swagger](http://localhost:3000/api)**
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Rodando a aplicação
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+A aplicação estará disponível em [http://localhost:3000](http://localhost:3000).
 
-```bash
-$ pnpm install -g mau
-$ mau deploy
-```
+Ou simplesmente acesse a documentação da API em [http://localhost:3000/api](https://rocket-shop-kappa.vercel.app/)
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Estrutura do Projeto
 
-## Resources
+A estrutura do projeto segue as convenções do NestJS, promovendo modularidade e organização:
 
-Check out a few resources that may come in handy when working with NestJS:
+/prisma
+  |- schema.prisma  # Define o schema do banco de dados e os modelos
+  |- migrations/    # Contém os arquivos de migração do banco de dados
+  |- seed.ts        # (Opcional) Script para popular o banco com dados iniciais
+/src
+  |- /auth          # Módulo de autenticação (login, registro, gerenciamento de token)
+  |- /users         # Módulo para gerenciamento de usuários
+  |- /products      # Módulo para gerenciamento de produtos
+  |- /carts         # Módulo para gerenciamento de carrinhos de compra
+  |- /orders        # Módulo para gerenciamento de pedidos
+  |- /favorites     # Módulo para gerenciamento de produtos favoritos
+  |- /reviews       # Módulo para gerenciamento de avaliações de produtos
+  |- app.module.ts  # Módulo raiz da aplicação
+  |- main.ts        # Arquivo de entrada da aplicação
+.env                # Arquivo para variáveis de ambiente (DATABASE_URL, JWT_SECRET, etc.)
+.eslintrc.js
+.prettierrc
+nest-cli.json
+package.json
+tsconfig.json
+README.md
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Funcionalidades
 
-## Support
+A API oferece as seguintes funcionalidaddes principais:
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Autenticação e Usuários
+- Cadastro de novos usuários.
+- Login de usuários com email e senha.
+- Gerenciamento de perfil do usuário (visualização, atualização).
+- Definição de papéis de usuário (ex: `CUSTOMER`, `ADMIN` - necessita implementação da lógica de autorização).
 
-## Stay in touch
+### Produtos
+- Criação, listagem, visualização, atualização e remoção de produtos (CRUD - para administradores).
+- Listagem e busca de produtos para clientes.
+- Visualização de detalhes de um produto específico.
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+### Favoritos
+- Adicionar um produto à lista de favoritos de um usuário.
+- Remover um produto da lista de favoritos.
+- Listar produtos favoritos de um usuário.
 
-## License
+### Carrinho de Compras
+- Adicionar um produto ao carrinho de um usuário.
+- Visualizar o conteúdo do carrinho.
+- Atualizar a quantidade de um item no carrinho.
+- Remover um item do carrinho.
+- Limpar o carrinho.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Pedidos
+- Criação de um pedido a partir dos itens do carrinho.
+- Listagem de pedidos de um usuário.
+- Visualização de detalhes de um pedido específico.
+- Atualização do status de um pedido (ex: `PENDING`, `PROCESSING`, `SHIPPED`, `DELIVERED`, `CANCELED` - geralmente por administradores).
+
+### Avaliações (Reviews)
+- Adicionar uma avaliação (rating e comentário) para um produto.
+- Visualizar avaliações de um produto.
+- Usuário só pode avaliar um produto uma vez.
+
+## Tecnologias e Principais Bibliotecas Utilizadas
+
+**Backend & API:**
+
+- **[NestJS](https://nestjs.com/):** Framework Node.js progressivo para construir aplicações backend eficientes, escaláveis e robustas.
+- **[Prisma](https://www.prisma.io/):** ORM (Object-Relational Mapper) moderno para Node.js e TypeScript, utilizado para interagir com o banco de dados.
+- **[TypeScript](https://www.typescriptlang.org/):** Superset do JavaScript que adiciona tipagem estática e funcionalidades de orientação a objetos.
+- **Banco de Dados:** [SQLite](https://www.sqlite.org/index.html) (para desenvolvimento/padrão inicial), facilmente substituível por PostgreSQL, MySQL, etc., via configuração do Prisma.
+- **Autenticação:**
+  - `passport`: Middleware de autenticação para Node.js.
+  - `passport-local`: Estratégia Passport para autenticação com username/password.
+  - `passport-jwt`: Estratégia Passport para autenticação baseada em JWT.
+  - `@nestjs/jwt`: Módulo NestJS para trabalhar com JSON Web Tokens.
+  - `bcrypt`: Biblioteca para hashing de senhas.
+- **Validação:**
+  - `class-validator`: Para validação de DTOs (Data Transfer Objects) baseada em decorators.
+  - `class-transformer`: Para transformar plain objects em instâncias de classes e vice-versa.
+- **Linting e Formatação:**
+  - ESLint
+  - Prettier
+
+## Explicação das Regras de Negócio
+
+Com base no schema Prisma, as seguintes regras de negócio são aplicadas:
+
+- **Usuários:**
+    - O email do usuário deve ser único.
+    - Por padrão, um novo usuário tem o papel (`role`) "CUSTOMER".
+- **Favoritos:**
+    - Um usuário pode favoritar um mesmo produto apenas uma vez (`@@unique([userId, productId])`).
+    - Se um usuário ou produto for deletado, as entradas correspondentes em `Favorite` são removidas em cascata (`onDelete: Cascade`).
+- **Carrinho:**
+    - Cada usuário possui um único carrinho (`userId @unique` em `Cart`).
+    - Um produto específico pode aparecer apenas uma vez como um item no carrinho (`CartItem`), sendo sua quantidade controlada pelo campo `quantity` (`@@unique([cartId, productId])` em `CartItem`).
+    - Se um usuário ou produto for deletado, o carrinho ou os itens do carrinho associados são removidos em cascata.
+- **Pedidos:**
+    - O status padrão de um novo pedido é "PENDING".
+    - `OrderItem.priceAtPurchase` armazena o preço do produto no exato momento da compra, garantindo a integridade do valor mesmo que o preço do produto mude posteriormente.
+    - A exclusão de um produto da loja (`Product`) não remove os `OrderItem` relacionados a ele, permitindo manter o histórico de pedidos. Para isso, a relação em `OrderItem` para `Product` não deve usar `onDelete: Cascade` se essa for a intenção.
+- **Avaliações:**
+    - Um usuário pode avaliar um mesmo produto apenas uma vez (`@@unique([userId, productId])`).
+    - As avaliações são indexadas por `productId` para buscas mais eficientes.
+    - Se um usuário ou produto for deletado, as avaliações correspondentes são removidas em cascata.
+
+
+## Estratégia de Autenticação Utilizada
+
+A autenticação é implementada utilizando uma combinação de:
+
+1.  **Estratégia Local (Username/Password):**
+    - Os usuários se autenticam fornecendo email e senha.
+    - As senhas são armazenadas de forma segura no banco de dados utilizando hashing (ex: bcrypt).
+    - O módulo `@nestjs/passport` com `passport-local` é utilizado para validar as credenciais.
+2.  **JSON Web Tokens (JWT):**
+    - Após o login bem-sucedido, um JWT é gerado e retornado ao cliente.
+    - O cliente deve incluir este token no cabeçalho `Authorization` (como um Bearer Token) em requisições subsequentes para acessar rotas protegidas.
+    - O módulo `@nestjs/jwt` e `passport-jwt` são utilizados para gerar e validar os tokens.
+3.  **Guards:**
+    - Rotas protegidas utilizam `AuthGuards` do NestJS para garantir que apenas usuários autenticados possam acessá-las.
+
+## Uso de IA
+
+No projeto foram utilizados o Github Copilot e Google Gemini, para economizar esforço na estilização de componentes mais complexos utilizando Tailwind, além da resolução de problemas e erros no código.
+
+---
+
+O projeto foi criado utilizado [Nest](https://react.dev/), [TypeScript](https://www.typescriptlang.org/) e [SQLite](https://vitejs.dev/).
