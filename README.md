@@ -26,7 +26,7 @@ Api de e-commerce criado para a segunda atividade do RocketLab.
 
 3. **Configure o .env**
 
-Crie um arquivo .env de acordo com o .env.example fornecido
+Crie um arquivo .env de acordo com o .env.example fornecido, executando o comando: cp .env.example .env
 
 3. **Gere e popule o banco de dados:**
 
@@ -41,6 +41,31 @@ Crie um arquivo .env de acordo com o .env.example fornecido
 ```
 
 5. **Acesse a [Documentação do Swagger](http://localhost:3000/api)**
+
+**OBS: Para conseguir o token de autentiação, você deve logar em uma das contas já existentes no endpoint de login ou a que você pode criar no endpoint de register e copiar o token. Esse mesmo token deve ser colocado na seção de autenticação do Swagger, no canto superior direito. Apartir disso, todas as requisições automaticamente já estarão com o token de validação.**
+
+Contas Existentes:
+```
+{
+  email: 'alice@example.com',
+  password: 'password123',
+}
+ou
+{
+  email: 'bob@example.com',
+  password: 'password456',
+}
+ou
+{
+  email: 'charlie@example.com',
+  password: 'password789',
+}
+ou como admin
+{
+  email: 'admin@example.com',
+  password: 'adminPass123!',
+}
+```
 
 ### Rodando a aplicação
 
@@ -176,8 +201,8 @@ A autenticação é implementada utilizando uma combinação de:
 
 ## Uso de IA
 
-No projeto foram utilizados o Github Copilot e Google Gemini, para economizar esforço na estilização de componentes mais complexos utilizando Tailwind, além da resolução de problemas e erros no código.
+No projeto foram utilizados o Github Copilot e Google Gemini, para economizar esforço e aumentar a produtividade na hora de replicar códigos de diferentes módulos.
 
 ---
 
-O projeto foi criado utilizado [Nest](https://react.dev/), [TypeScript](https://www.typescriptlang.org/) e [SQLite](https://vitejs.dev/).
+O projeto foi criado utilizado [Nest](https://docs.nestjs.com/openapi/introduction), [TypeScript](https://www.typescriptlang.org/) e [SQLite](https://www.sqlite.org).
