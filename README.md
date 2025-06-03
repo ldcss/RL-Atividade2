@@ -52,6 +52,7 @@ Ou simplesmente acesse a documentação da API em [http://localhost:3000/api](ht
 
 A estrutura do projeto segue as convenções do NestJS, promovendo modularidade e organização:
 
+```
 /prisma
   |- schema.prisma  # Define o schema do banco de dados e os modelos
   |- migrations/    # Contém os arquivos de migração do banco de dados
@@ -73,6 +74,7 @@ nest-cli.json
 package.json
 tsconfig.json
 README.md
+```
 
 ## Funcionalidades
 
